@@ -4,6 +4,8 @@ metadata:
   name: vllm
   namespace: rag
 spec:
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels: { app: vllm }
@@ -15,8 +17,10 @@ spec:
       containers:
         - name: vllm
           image: ghcr.io/timothystewart6/vllm-gb10:v0.25.1-gb10.1
+          command: ["vllm"]
           args:
-            - "cybermotaz/nemotron3-nano-nvfp4-w4a16"   # erst Nano, dann Super swappen
+            - "serve"
+            - "cybermotaz/nemotron3-nano-nvfp4-w4a16"
             - "--host=0.0.0.0"
             - "--port=8000"
             - "--quantization=modelopt_fp4"
