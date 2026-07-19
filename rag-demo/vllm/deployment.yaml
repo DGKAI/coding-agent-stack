@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm
+  namespace: rag
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: vllm }
+  template:
+    metadata:
+      labels: { app: vllm }
+    spec:
+      runtimeClassName: nvidia
+      containers:
+        - name: vllm
+          image: <vllm-sm121-image>     # <-- PLATZHALTER, gepinnt einsetzen
+          args:
+            - "serve"
+            - "cybermotaz/nemotron3-nano-nvfp4-w4a16"   # erst Nano, dann Super swappen
+            - "--host=0.0.0.0"
+            - "--port=8000"
+            - "--quantization=modelopt_fp4"
+            - "--kv-cache-dtype=fp8"
+            - "--reasoning-parser=deepseek_r1"
+            - "--trust-remote-code"
+            - "--max-model-len=131072"
+            - "--gpu-memory-utilization=0.85"
+            - "--max-num-seqs=4"
+          env:
+            - name: VLLM_MXFP4_BACKEND
+              value: marlin
+            - name: VLLM_FLASHINFER_MOE_BACKEND
+              value: latency
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          volumeMounts:
+            - { name: hf-cache, mountPath: /root/.cache/huggingface }
+            - { name: shm, mountPath: /dev/shm }
+          startupProbe:
+            httpGet: { path: /health, port: 8000 }
+            periodSeconds: 15
+            failureThreshold: 60
+          readinessProbe:
+            httpGet: { path: /health, port: 8000 }
+            periodSeconds: 10
+      volumes:
+        - name: hf-cache
+          persistentVolumeClaim: { claimName: vllm-hf-cache }
+        - name: shm
+          emptyDir: { medium: Memory, sizeLimit: 4Gi }
