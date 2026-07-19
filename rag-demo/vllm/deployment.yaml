@@ -31,6 +31,8 @@ spec:
             - "--gpu-memory-utilization=0.85"
             - "--max-num-seqs=4"
           env:
+            - name: VLLM_PORT
+              value: "8000"
             - name: VLLM_MXFP4_BACKEND
               value: marlin
             - name: VLLM_FLASHINFER_MOE_BACKEND
