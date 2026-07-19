@@ -14,7 +14,7 @@ spec:
       runtimeClassName: nvidia
       containers:
         - name: vllm
-          image: <vllm-sm121-image>     # <-- PLATZHALTER, gepinnt einsetzen
+          image: ghcr.io/timothystewart6/vllm-gb10:v0.25.1-gb10.1
           args:
             - "serve"
             - "cybermotaz/nemotron3-nano-nvfp4-w4a16"   # erst Nano, dann Super swappen
